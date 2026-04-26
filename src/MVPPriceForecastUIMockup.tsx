@@ -11,7 +11,6 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceA
 const PRODUCT_OPTIONS = [
   { key: "cage_free_eggs", label: "Cage free eggs" },
   { key: "full_cream_milk_1l", label: "Full cream milk 1L" },
-  { key: "full_cream_milk_3l", label: "Full cream milk 3L" },
   { key: "cadbury_dairy_milk_180g", label: "Cadbury Dairy Milk Chocolate 180g" },
   { key: "beef_topside", label: "Beef topside" },
   { key: "chicken_breast_large_pack", label: "Chicken Breast Fillets Large Pack" },

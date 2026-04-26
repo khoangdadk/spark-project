@@ -106,7 +106,6 @@ function matchProductKey(productName) {
 
   if (t.includes("cage free") && t.includes("egg")) return "cage_free_eggs";
   if (t.includes("full cream") && t.includes("milk") && t.includes("1l")) return "full_cream_milk_1l";
-  if (t.includes("full cream") && t.includes("milk") && t.includes("3l")) return "full_cream_milk_3l";
   if (t.includes("cadbury") && t.includes("dairy milk") && t.includes("180g")) return "cadbury_dairy_milk_180g";
   if (t.includes("beef") && t.includes("topside")) return "beef_topside";
   if (t.includes("chicken") && t.includes("breast")) return "chicken_breast_large_pack";
@@ -114,6 +113,7 @@ function matchProductKey(productName) {
   if (t.includes("brown onion") && t.includes("1kg")) return "brown_onions_1kg";
   if (t.includes("pork") && t.includes("mince") && t.includes("500g")) return "pork_mince_500g";
   if (t.includes("banana")) return "bananas";
+  if (t.includes("carrot") && t.includes("1kg")) return "carrots_1kg";
 
   return null;
 }

@@ -19,6 +19,7 @@ const PRODUCT_OPTIONS = [
   { key: "brown_onions_1kg", label: "Brown Onions 1kg" },
   { key: "pork_mince_500g", label: "Pork Mince 500g" },
   { key: "bananas", label: "Bananas" },
+  { key: "carrots_1kg", label: "Carrots 1kg" },
 ];
 
 type ProductRow = {
@@ -64,6 +65,23 @@ export default function MVPPriceForecastUIMockup() {
   const [query, setQuery] = useState("full_cream_milk_1l");
   const [selectedStore, setSelectedStore] = useState("Coles");
   const [tab, setTab] = useState("timeline");
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+
+    const productKey = params.get("product_key");
+    const store = params.get("store");
+
+    const validProductKey = PRODUCT_OPTIONS.some((p) => p.key === productKey);
+
+    if (productKey && validProductKey) {
+      setQuery(productKey);
+    }
+
+    if (store) {
+      setSelectedStore(store);
+    }
+  }, []);
 
   useEffect(() => {
   fetch("/data/mock_supermarket_products.csv")

@@ -60,20 +60,95 @@ function getCurrentSupermarket() {
   return null;
 }
 
-function isAddToCartButton(el) {
-  if (!el) return false;
+function findClickableFromEvent(event) {
+  const path = event.composedPath ? event.composedPath() : [];
 
-  const clickable = el.closest("button, a, [role='button']");
+  for (const node of path) {
+    if (!(node instanceof Element)) continue;
+
+    if (
+      node.matches(
+        [
+          "button",
+          "a",
+          "[role='button']",
+          "wc-add-to-cart",
+          ".add-to-cart-btn",
+          "[aria-label]",
+          "[data-testid]",
+        ].join(", ")
+      )
+    ) {
+      return node;
+    }
+  }
+
+  const target =
+    event.target instanceof Element
+      ? event.target
+      : null;
+
+  if (!target) return null;
+
+  return target.closest(
+    [
+      "button",
+      "a",
+      "[role='button']",
+      "wc-add-to-cart",
+      ".add-to-cart-btn",
+      "[aria-label]",
+      "[data-testid]",
+    ].join(", ")
+  );
+}
+
+function isAddToCartButton(el) {
+  if (!(el instanceof Element)) return false;
+
+  const clickable = el.matches(
+    [
+      "button",
+      "a",
+      "[role='button']",
+      "wc-add-to-cart",
+      ".add-to-cart-btn",
+      "[aria-label]",
+      "[data-testid]",
+    ].join(", ")
+  )
+    ? el
+    : el.closest(
+        [
+          "button",
+          "a",
+          "[role='button']",
+          "wc-add-to-cart",
+          ".add-to-cart-btn",
+          "[aria-label]",
+          "[data-testid]",
+        ].join(", ")
+      );
+
   if (!clickable) return false;
 
   const text = normalizeText(
     clickable.innerText ||
-    clickable.textContent ||
-    clickable.getAttribute("aria-label") ||
-    ""
+      clickable.textContent ||
+      clickable.getAttribute("aria-label") ||
+      clickable.getAttribute("title") ||
+      clickable.getAttribute("data-testid") ||
+      ""
   );
 
-  return /add to (cart|trolley)/i.test(text);
+  console.log("[SaleSeer] isAddToCartButton text:", text);
+
+  if (/add to (cart|trolley)/i.test(text)) return true;
+  if (/^add$/i.test(text)) return true;
+  if (/^add 1$/i.test(text)) return true;
+  if (/add item/i.test(text)) return true;
+
+  return false;
 }
 
 function extractProductInfo(triggerEl) {
@@ -353,19 +428,55 @@ function sendDebugLog(payload) {
 }
 
 function installClickListener() {
-  document.addEventListener(
-    "click",
-    (event) => {
-      if (!SETTINGS.triggerEnabled) return;
+ const LOG = "[SaleSeer]";
 
-      const target = event.target;
-      if (!isAddToCartButton(target)) return;
+function describeNode(node) {
+  if (!node) return "null";
+  if (node instanceof Element) {
+    return {
+      tag: node.tagName,
+      cls: node.className,
+      id: node.id,
+      role: node.getAttribute("role"),
+      aria: node.getAttribute("aria-label"),
+      text: (node.innerText || node.textContent || "").trim().slice(0, 120),
+      testid: node.getAttribute("data-testid"),
+    };
+  }
+  return { type: node.nodeName };
+}
+document.addEventListener(
+  "click",
+  async (event) => {
+    if (!SETTINGS.triggerEnabled) return;
 
-      const clickable = target.closest("button, a, [role='button']");
-      const info = extractProductInfo(clickable);
-      const supermarket = info.supermarket;
+    console.log("[SaleSeer] stage 0: click received");
 
-      if (!supermarket) return;
+    const clickable = findClickableFromEvent(event);
+
+    if (!clickable) {
+      console.log("[SaleSeer] STOP: no clickable ancestor");
+      return;
+    }
+
+    console.log("[SaleSeer] clickable candidate:", clickable);
+
+    const isAdd = isAddToCartButton(clickable);
+    console.log("[SaleSeer] stage 1: isAddToCartButton =", isAdd);
+
+    if (!isAdd) {
+      console.log("[SaleSeer] STOP: not recognized as add-to-cart button");
+      return;
+    }
+
+    const info = extractProductInfo(clickable);
+    console.log("[SaleSeer] stage 2: extracted info =", info);
+
+    const supermarket = info.supermarket;
+    if (!supermarket) {
+      console.log("[SaleSeer] STOP: supermarket not detected");
+      return;
+    }
 
       const dedupeKey = `${info.productName}|${info.productUrl}|${supermarket}`;
       const now = Date.now();

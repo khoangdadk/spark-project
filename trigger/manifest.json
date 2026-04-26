@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "Coles Trigger Test",
+  "version": "1.0.0",
+  "description": "Test add-to-trolley trigger on Coles.",
+  "host_permissions": [
+    "https://www.coles.com.au/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.coles.com.au/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
